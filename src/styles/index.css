@@ -1,0 +1,646 @@
+/* Design tokens + resets first, then the ported resume document/editor styles,
+   then jakeforge's own two-pane app shell. */
+@import "./tokens.css";
+@import "./base.css";
+@import "./resume-document.css";
+@import "./resume-editor.css";
+
+/* ===== App shell ===== */
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  align-items: stretch;
+}
+
+.sidebar {
+  flex: 0 0 296px;
+  width: 296px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  padding: var(--s5) var(--s4) var(--s6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+  background: var(--card);
+  border-right: 1px solid var(--hairline);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--hairline-soft);
+}
+
+.brand__mark {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+}
+
+.brand__sub {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+/* Sidebar utility row: Import drop-zone + Starter button, side by side. */
+.sidebar__actions {
+  display: flex;
+  align-items: stretch;
+  gap: var(--s2);
+}
+
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.panel__title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+/* Title row with an inline action (e.g. the Typography reset button). */
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+}
+
+/* Small icon-only button (e.g. reset). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  color: var(--ink-soft);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  transition: color 0.12s var(--ease), background 0.12s var(--ease);
+  cursor: pointer;
+}
+
+.icon-btn:hover:not(:disabled) {
+  color: var(--ink-strong);
+  background: var(--card-hover);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.panel__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.panel__actions {
+  display: flex;
+  gap: var(--s2);
+  flex-wrap: wrap;
+}
+
+.panel__hint {
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.panel__hint code,
+.panel__status code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  background: var(--paper-deep);
+  padding: 1px 5px;
+  border-radius: var(--r-sm);
+}
+
+/* ===== Modal shell (preview, rename, confirm, any system message) ===== */
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  background: var(--card-elev);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+}
+
+.modal--sm {
+  width: min(420px, 92vw);
+}
+
+.modal--lg {
+  width: min(880px, 92vw);
+  height: min(92vh, 1100px);
+}
+
+.modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s3) var(--s4);
+  font-weight: 600;
+  color: var(--ink-strong);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.modal__close {
+  display: inline-flex;
+  padding: 4px;
+  color: var(--ink-soft);
+  border-radius: var(--r-sm);
+}
+
+.modal__close:hover {
+  color: var(--ink-strong);
+  background: var(--card-hover);
+}
+
+.modal__body {
+  padding: var(--s4);
+}
+
+/* Flush body for the PDF preview iframe — fills the panel, no padding. */
+.modal__body--flush {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+}
+
+.modal__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4) var(--s4);
+}
+
+.modal__foot .btn {
+  padding: 8px 14px;
+}
+
+.modal__frame {
+  flex: 1 1 auto;
+  width: 100%;
+  border: 0;
+}
+
+.modal__msg {
+  margin: auto;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.modal__msg--error {
+  color: var(--danger);
+}
+
+.dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.dialog__input {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--card);
+}
+
+.dialog__input:focus-within {
+  border-color: var(--accent);
+}
+
+.dialog__input input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--ink-strong);
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+.dialog__ext {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+  border-left: 1px solid var(--hairline);
+}
+
+
+.panel__status {
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-veil);
+  border-radius: var(--r-md);
+  padding: var(--s2) var(--s3);
+}
+
+/* ===== Controls ===== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  padding: 9px 12px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--ink-strong);
+  background: var(--card-elev);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-rest);
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease), transform 0.05s var(--ease);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--card-hover);
+  border-color: var(--accent);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn--primary {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent-deep);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--accent-deep);
+}
+
+.btn--ghost {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: none;
+  border-color: var(--hairline);
+  box-shadow: none;
+}
+
+/* Compact export toolbar: labeled primary + icon-only secondaries on one row. */
+.export-row {
+  display: flex;
+  gap: var(--s2);
+}
+
+.export-row__main {
+  flex: 1 1 auto;
+}
+
+.export-row__icon {
+  flex: 0 0 auto;
+  width: 40px;
+  padding: 0;
+}
+
+.ctl-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.ctl-row select {
+  padding: 5px 8px;
+  font-size: 0.82rem;
+  color: var(--ink-strong);
+  background: var(--card-elev);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-sm);
+}
+
+/* Toggle pills — a formatting-toolbar feel instead of a checkbox column. */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip {
+  padding: 4px 11px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--card-elev);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-pill);
+  transition: background 0.12s var(--ease), border-color 0.12s var(--ease), color 0.12s var(--ease);
+}
+
+.chip:hover {
+  color: var(--ink-strong);
+  border-color: var(--accent);
+}
+
+.chip.is-active {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent-deep);
+}
+
+/* Glyph chips for divider quick-picks — square-ish, monospace for alignment. */
+.chip--glyph {
+  min-width: 30px;
+  padding: 4px 0;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+/* Labeled cluster of related controls inside a panel. */
+.ctl-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--hairline-soft);
+}
+
+.ctl-group:last-of-type {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.ctl-group__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-faint);
+}
+
+.ctl-divider {
+  width: 44px;
+  padding: 4px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  text-align: center;
+  color: var(--ink-strong);
+  background: var(--card-elev);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-sm);
+  outline: none;
+}
+
+.ctl-divider:focus {
+  border-color: var(--accent);
+}
+
+.ctl-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ctl-slider__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.ctl-slider__value {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+
+.ctl-slider input[type="range"] {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--paper-deep);
+  border-radius: var(--r-pill);
+}
+
+.seg__opt {
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border-radius: var(--r-pill);
+}
+
+.seg__opt.is-active {
+  color: var(--accent-deep);
+  background: var(--card-elev);
+  box-shadow: var(--shadow-rest);
+}
+
+/* ===== Editor canvas ===== */
+
+.canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100vh;
+  overflow: auto;
+  padding: var(--s5);
+  /* Establish an inline-size query container so the page's `cqw`-based font
+     (resume-document.css) scales with THIS pane's width — matching Jake's
+     printed proportions and resizing live as the window width changes. The
+     .resume-doc centers itself via margin-inline:auto. */
+  container-type: inline-size;
+  background:
+    radial-gradient(circle at 1px 1px, var(--hairline-soft) 1px, transparent 0) 0 0 / 22px 22px,
+    var(--paper-deep);
+}
+
+/* ===== Import drop-zone ===== */
+
+.sidebar__drop {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: var(--s3);
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-strong);
+  background: var(--card-soft, var(--card-elev));
+  border: 1.5px dashed var(--hairline-strong);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.sidebar__drop:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.sidebar__drop.is-dragover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 2px var(--accent-veil, oklch(0.7 0.15 200 / 0.15));
+}
+
+.sidebar__drop small {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.import {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.import__hint {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.import__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--s4);
+  text-align: center;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--ink-strong);
+  background: var(--card-soft);
+  border: 1.5px dashed var(--hairline-strong);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.import__drop:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.import__drop small {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.import__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+}
+
+.import__divider::before,
+.import__divider::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--hairline);
+}
+
+.import__text {
+  width: 100%;
+  resize: vertical;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-strong);
+  background: var(--card);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-md);
+  outline: none;
+}
+
+.import__text:focus {
+  border-color: var(--accent);
+}
+
+.import__error {
+  font-size: 0.8rem;
+  color: var(--danger);
+}
+
+/* ===== Modal backdrop (shared by every Modal) ===== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s5);
+  background: oklch(0.2 0.01 160 / 0.42);
+}
+
+@media (max-width: 720px) {
+  .app {
+    flex-direction: column;
+  }
+  .sidebar {
+    position: static;
+    width: 100%;
+    flex-basis: auto;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .canvas {
+    height: auto;
+  }
+}
