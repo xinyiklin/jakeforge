@@ -5,7 +5,6 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, resolve, sep } from "node:path";
-import { createServer as createViteServer } from "vite";
 import {
   listTemplates,
   renderResumeTex,
@@ -22,6 +21,38 @@ const root = process.cwd();
 const isProduction = process.env.NODE_ENV === "production";
 const port = Number(process.env.PORT ?? 5186);
 const host = process.env.HOST ?? "127.0.0.1";
+// Hostnames the app is served from when bound beyond loopback (e.g. an EC2
+// deployment reached by public IP during bring-up and by domain afterwards).
+// Comma-separated; loopback names are always allowed so on-box smoke tests and
+// container health checks keep working.
+const allowedHostList = (process.env.ALLOWED_HOSTS ?? process.env.ALLOWED_HOST ?? "")
+  .split(",")
+  .map((h) => h.trim())
+  .filter(Boolean);
+const isLoopbackBind = host === "127.0.0.1" || host === "localhost" || host === "::1";
+
+if (!isLoopbackBind && allowedHostList.length === 0) {
+  console.error(
+    `HOST=${host} binds beyond loopback but ALLOWED_HOSTS is not set — every /api request would be rejected.\n` +
+      `Set ALLOWED_HOSTS to the hostname(s) the app is reached by, e.g. ALLOWED_HOSTS=resume.example.com,203.0.113.7`
+  );
+  process.exit(1);
+}
+
+const allowedHosts = new Set([
+  "localhost",
+  "127.0.0.1",
+  "[::1]",
+  `localhost:${port}`,
+  `127.0.0.1:${port}`,
+  `[::1]:${port}`
+]);
+for (const name of allowedHostList) {
+  allowedHosts.add(name);
+  allowedHosts.add(`${name}:${port}`);
+  allowedHosts.add(`${name}:80`);
+  allowedHosts.add(`${name}:443`);
+}
 
 async function handleListTemplates(req, res) {
   if (req.method !== "GET") {
@@ -172,9 +203,11 @@ async function serveStatic(req, res) {
   }
 }
 
+// Vite is a devDependency; import it lazily so a production install
+// (`npm ci --omit=dev`) can boot without it.
 const vite = isProduction
   ? null
-  : await createViteServer({
+  : await (await import("vite")).createServer({
       root,
       appType: "spa",
       server: { middlewareMode: true }
@@ -183,10 +216,9 @@ const vite = isProduction
 const server = createServer((req, res) => {
   const pathname = new URL(req.url ?? "/", `http://${req.headers.host}`).pathname;
 
-  // Same-origin/Host guard for the local API: a website the user visits must not
-  // be able to drive this server cross-origin or read the resume via DNS rebind.
-  if (pathname.startsWith("/api/") && host === "127.0.0.1") {
-    const allowedHosts = new Set([`localhost:${port}`, `127.0.0.1:${port}`, `[::1]:${port}`]);
+  // Same-origin/Host guard for the API: a website the user visits must not be
+  // able to drive this server cross-origin or read the resume via DNS rebind.
+  if (pathname.startsWith("/api/")) {
     if (!allowedHosts.has(req.headers.host ?? "")) {
       sendJson(res, 403, { error: "Forbidden host." });
       return;

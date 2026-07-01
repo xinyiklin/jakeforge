@@ -39,7 +39,7 @@ tailoring, job tracker, and applications stripped out.
   intentionally unsupported — it extracts too poorly to be useful.
 - **In-app PDF preview** — compile and view the LaTeX PDF without downloading.
 - **Autosave** — the structured resume is persisted to `localStorage`, so a
-  reload keeps your work. Nothing leaves your machine.
+  reload keeps your work. Rendering only calls the app's own LaTeX endpoints.
 
 ## Getting started
 
@@ -71,13 +71,48 @@ sidebar shows the clean-print hint.
 | `npm run build` | Typecheck (`tsc`) + production build to `dist/` |
 | `npm run preview` | Serve the production build (`NODE_ENV=production`) |
 
+## Deploying (Docker)
+
+The `Dockerfile` builds a self-contained image: the production bundle,
+`server.mjs`, Tectonic (arch-matched, so LaTeX PDF works in the container), and
+`unzip` for DOCX import.
+
+```bash
+docker build -t jakeforge .
+docker run -p 5186:5186 -e ALLOWED_HOSTS=resume.example.com,203.0.113.7 jakeforge
+```
+
+`ALLOWED_HOSTS` is required: a comma-separated list of every hostname or IP the
+app is reached by. It backs the same-origin/Host guard on the API, and the
+server refuses to start without it when bound beyond loopback. Loopback names
+(`localhost`, `127.0.0.1`) are always allowed, so on-box smoke tests and
+container health checks work regardless.
+
+A single small instance (e.g. an EC2 `t3.micro`) is plenty — the server is one
+Node process with no database.
+
+For a small EC2 deployment, publish container port `5186` on host port `80` and
+include both the public DNS name and public IP in `ALLOWED_HOSTS`:
+
+```bash
+docker run -d \
+  --name jakeforge \
+  --restart unless-stopped \
+  -p 80:5186 \
+  -e ALLOWED_HOSTS=ec2-example.compute-1.amazonaws.com,203.0.113.7 \
+  jakeforge
+```
+
+Use plain HTTP only for smoke testing. Put HTTPS in front of the app before
+entering real resume content on a hosted instance.
+
 ## Architecture
 
 ```
 src/
   lib/            resume data model + parse/serialize/LaTeX-extract helpers
   hooks/          useResumeEditor · useDocStyle · useTemplates · useResumeExport
-  components/     reusable Modal shell + ImportModal
+  components/     reusable Modal shell, ImportModal, and SectionNav
   sections/
     editor/       the editable on-page resume (sections, entries, bullets, skills)
     Resume*.tsx   read-only document + off-screen print layer
@@ -99,6 +134,7 @@ clean-print mirror.
 
 ## Privacy
 
-Local-only and personal. The resume lives in `localStorage` and is sent solely to
-the local LaTeX endpoints on your own machine for rendering. There is no account,
-network upload, or third-party service.
+Local-first and personal. The resume lives in `localStorage` and is sent solely
+to the app's own LaTeX endpoints for rendering — on your machine when running
+locally, or on your own server when self-hosting the Docker image. There is no
+account, no database, and no third-party service.
