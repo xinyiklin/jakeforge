@@ -5,9 +5,10 @@ dist
 *.local
 .env
 .env.*
-!.env.example
 *.pem
 CONTINUITY.md
 .claude/
-.playwright-cli/
-output/playwright/
+.git
+.github
+.playwright-cli
+output/playwright

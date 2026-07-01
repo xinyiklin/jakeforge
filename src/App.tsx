@@ -8,6 +8,7 @@ import { useResumeExport } from "./hooks/useResumeExport";
 import { ResumeEditor } from "./sections/editor/ResumeEditor";
 import { ResumePrintLayer } from "./sections/ResumePrintLayer";
 import { Modal } from "./components/Modal";
+import { SectionNav } from "./components/SectionNav";
 import { buildStarterResume, reidResume } from "./sampleResume";
 import { fileToText } from "./lib/importResume";
 import type { ResumeData } from "./lib/resumeData";
@@ -200,6 +201,7 @@ export default function App() {
   const docStyle = useDocStyle();
   const templates = useTemplates();
   const [texStatus, setTexStatus] = useState("");
+  const canvasRef = useRef<HTMLElement>(null);
 
   // The 11 fine-grained spacing sliders live behind a disclosure — most people
   // pick a preset and never open them. Closed by default; choice is remembered.
@@ -399,6 +401,8 @@ export default function App() {
             <span className="brand__sub">Jake&apos;s-style resume editor</span>
           </div>
         </div>
+
+        <SectionNav canvasRef={canvasRef} sections={editor.editedResume?.sections ?? []} />
 
         <div className="sidebar__actions">
           <label
@@ -607,7 +611,7 @@ export default function App() {
         </section>
       </aside>
 
-      <main className="canvas">
+      <main className="canvas" ref={canvasRef}>
         {editor.editedResume ? (
           <ResumeEditor data={editor.editedResume} actions={editor.actions} style={docStyle.cssVars} />
         ) : null}
